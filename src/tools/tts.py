@@ -10,6 +10,7 @@ import uuid
 import logging
 import requests
 from typing import Optional, Dict, Any
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +128,55 @@ class VolcengineTTS:
                 "audio_data": response_json["data"],  # Base64 encoded audio data
             }
 
+        except Exception as e:
+            logger.exception(f"Error in TTS API call: {str(e)}")
+            return {"success": False, "error": "TTS API call error", "audio_data": None}
+
+
+class OpenAITTS:
+    """Client for OpenAI Text-to-Speech API."""
+
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "tts-1",
+        voice: str = "alloy",
+        host: str = "https://api.openai.com/v1/audio/speech",
+    ):
+        self.api_key = api_key
+        self.model = model
+        self.voice = voice
+        self.host = host
+
+    def text_to_speech(
+        self,
+        text: str,
+        encoding: str = "mp3",
+        speed_ratio: float = 1.0,
+        **_: Any,
+    ) -> Dict[str, Any]:
+        payload = {
+            "model": self.model,
+            "input": text,
+            "voice": self.voice,
+            "response_format": encoding,
+            "speed": speed_ratio,
+        }
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        try:
+            sanitized_text = text.replace("\r\n", "").replace("\n", "")
+            logger.debug(
+                f"Sending OpenAI TTS request for text: {sanitized_text[:50]}..."
+            )
+            response = requests.post(self.host, json=payload, headers=headers)
+            if response.status_code != 200:
+                logger.error(f"TTS API error: {response.text}")
+                return {"success": False, "error": response.text, "audio_data": None}
+            audio_b64 = base64.b64encode(response.content).decode()
+            return {"success": True, "audio_data": audio_b64}
         except Exception as e:
             logger.exception(f"Error in TTS API call: {str(e)}")
             return {"success": False, "error": "TTS API call error", "audio_data": None}

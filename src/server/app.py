@@ -40,7 +40,7 @@ from src.server.rag_request import (
     RAGResourceRequest,
     RAGResourcesResponse,
 )
-from src.tools import VolcengineTTS
+from src.tools import OpenAITTS
 
 logger = logging.getLogger(__name__)
 
@@ -200,25 +200,19 @@ def _make_event(event_type: str, data: dict[str, any]):
 
 @app.post("/api/tts")
 async def text_to_speech(request: TTSRequest):
-    """Convert text to speech using volcengine TTS API."""
-    app_id = os.getenv("VOLCENGINE_TTS_APPID", "")
-    if not app_id:
-        raise HTTPException(status_code=400, detail="VOLCENGINE_TTS_APPID is not set")
-    access_token = os.getenv("VOLCENGINE_TTS_ACCESS_TOKEN", "")
-    if not access_token:
-        raise HTTPException(
-            status_code=400, detail="VOLCENGINE_TTS_ACCESS_TOKEN is not set"
-        )
+    """Convert text to speech using OpenAI TTS API."""
+    api_key = os.getenv("OPENAI_TTS_API_KEY", "")
+    if not api_key:
+        raise HTTPException(status_code=400, detail="OPENAI_TTS_API_KEY is not set")
 
     try:
-        cluster = os.getenv("VOLCENGINE_TTS_CLUSTER", "volcano_tts")
-        voice_type = os.getenv("VOLCENGINE_TTS_VOICE_TYPE", "BV700_V2_streaming")
+        model = os.getenv("OPENAI_TTS_MODEL", "tts-1")
+        voice = os.getenv("OPENAI_TTS_VOICE", "alloy")
 
-        tts_client = VolcengineTTS(
-            appid=app_id,
-            access_token=access_token,
-            cluster=cluster,
-            voice_type=voice_type,
+        tts_client = OpenAITTS(
+            api_key=api_key,
+            model=model,
+            voice=voice,
         )
         # Call the TTS API
         result = tts_client.text_to_speech(
