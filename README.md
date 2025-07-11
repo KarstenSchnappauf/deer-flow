@@ -88,7 +88,7 @@ uv sync
 # Configure .env with your API keys
 # Tavily: https://app.tavily.com/home
 # Brave_SEARCH: https://brave.com/search/api/
-# volcengine TTS: Add your TTS credentials if you have them
+# OpenAI TTS: Add your TTS credentials if you have them
 cp .env.example .env
 
 # See the 'Supported Search Engines' and 'Text-to-Speech Integration' sections below for all available options
@@ -270,7 +270,7 @@ The system employs a streamlined workflow with the following components:
 
 ## Text-to-Speech Integration
 
-DeerFlow now includes a Text-to-Speech (TTS) feature that allows you to convert research reports to speech. This feature uses the volcengine TTS API to generate high-quality audio from text. Features like speed, volume, and pitch are also customizable.
+DeerFlow now includes a Text-to-Speech (TTS) feature that allows you to convert research reports to speech. This feature uses the OpenAI TTS API to generate high-quality audio from text. Features like speed, volume, and pitch are also customizable.
 
 ### Using the TTS API
 

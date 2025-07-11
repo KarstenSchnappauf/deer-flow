@@ -64,13 +64,12 @@ class TestTTSEndpoint:
     @patch.dict(
         os.environ,
         {
-            "VOLCENGINE_TTS_APPID": "test_app_id",
-            "VOLCENGINE_TTS_ACCESS_TOKEN": "test_token",
-            "VOLCENGINE_TTS_CLUSTER": "test_cluster",
-            "VOLCENGINE_TTS_VOICE_TYPE": "test_voice",
+            "OPENAI_TTS_API_KEY": "test_key",
+            "OPENAI_TTS_MODEL": "test_model",
+            "OPENAI_TTS_VOICE": "test_voice",
         },
     )
-    @patch("src.server.app.VolcengineTTS")
+    @patch("src.server.app.OpenAITTS")
     def test_tts_success(self, mock_tts_class, client):
         mock_tts_instance = MagicMock()
         mock_tts_class.return_value = mock_tts_instance
@@ -106,28 +105,27 @@ class TestTTSEndpoint:
         response = client.post("/api/tts", json=request_data)
 
         assert response.status_code == 400
-        assert "VOLCENGINE_TTS_APPID is not set" in response.json()["detail"]
+        assert "OPENAI_TTS_API_KEY is not set" in response.json()["detail"]
 
     @patch.dict(
         os.environ,
-        {"VOLCENGINE_TTS_APPID": "test_app_id", "VOLCENGINE_TTS_ACCESS_TOKEN": ""},
+        {"OPENAI_TTS_API_KEY": ""},
     )
-    def test_tts_missing_access_token(self, client):
+    def test_tts_missing_api_key(self, client):
         request_data = {"text": "Hello world", "encoding": "mp3"}
 
         response = client.post("/api/tts", json=request_data)
 
         assert response.status_code == 400
-        assert "VOLCENGINE_TTS_ACCESS_TOKEN is not set" in response.json()["detail"]
+        assert "OPENAI_TTS_API_KEY is not set" in response.json()["detail"]
 
     @patch.dict(
         os.environ,
         {
-            "VOLCENGINE_TTS_APPID": "test_app_id",
-            "VOLCENGINE_TTS_ACCESS_TOKEN": "test_token",
+            "OPENAI_TTS_API_KEY": "test_key",
         },
     )
-    @patch("src.server.app.VolcengineTTS")
+    @patch("src.server.app.OpenAITTS")
     def test_tts_api_error(self, mock_tts_class, client):
         mock_tts_instance = MagicMock()
         mock_tts_class.return_value = mock_tts_instance
@@ -146,7 +144,7 @@ class TestTTSEndpoint:
         assert "Internal Server Error" in response.json()["detail"]
 
     @pytest.mark.skip(reason="TTS server exception is catched")
-    @patch("src.server.app.VolcengineTTS")
+    @patch("src.server.app.OpenAITTS")
     def test_tts_api_exception(self, mock_tts_class, client):
         mock_tts_instance = MagicMock()
         mock_tts_class.return_value = mock_tts_instance
